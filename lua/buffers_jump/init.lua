@@ -18,7 +18,11 @@ function Get_Buffers()
 		end
 	end
 	if API.str_trim(cb_name) ~= "" then
-		table.insert(names, 2, cb_name)
+		local pos = 2
+		if #names == 0 then
+			pos = 1
+		end
+		table.insert(names, pos, cb_name)
 	end
 	return names
 end
@@ -49,6 +53,9 @@ M.setup = function(props)
 	local has_dressing, _ = pcall(require, "dressing")
 	if has_dressing == true then
 		local dress_opts = props.dressing
+		if dress_opts == nil then
+			dress_opts = {}
+		end
 		require("dressing").setup(dress_opts)
 	end
 	vim.api.nvim_create_user_command("BuffersJump", Select, {})
