@@ -2,6 +2,16 @@ local M ={}
 local API = {
 	str_trim = function(s)
 		return s:match("^%s*(.-)%s*$")
+	end,
+	contains = function(s, w, strict)
+		if strict == nil then
+			strict = false
+		end
+		if strict == false then
+			return string.find(s, w, 1, true) ~= nil
+		else
+			return string.find(s, "%f[%a]" .. w .. "%f[%A]") ~= nil
+		end
 	end
 }
 
@@ -13,7 +23,7 @@ function Get_Buffers()
 	for k, v in pairs(buffers) do
 		local name = vim.api.nvim_buf_get_name(v)
 		local trim = API.str_trim(name)
-		if trim ~= "" and trim ~= API.str_trim(cb_name) then
+		if trim ~= "" and trim ~= API.str_trim(cb_name) and API.contains(trim, "term:") ~= true then
 			table.insert(names, trim)
 		end
 	end
