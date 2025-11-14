@@ -2,8 +2,8 @@
 ## Description
 BuffersJump is a plugin for Neovim 0.9+. This plugin helps to jump between opened or loaded buffers in Neovim.
 
- - [Installation](https://github.com/aclCMNK/BuffersJump.nvim#Instalation)
- - [Usage](https://github.com/aclCMNK/BuffersJump.nvim#Usage)
+ - [Installation](#Instalation)
+ - [Usage](#Usage)
 
 ## Installation
 ### Simple installation
