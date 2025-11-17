@@ -19,26 +19,26 @@ function Get_Buffers()
 	local buffers = vim.api.nvim_list_bufs()
 	local count = 0
 	local names = {}
-	local cb_name = vim.api.nvim_buf_get_name(0)
+	-- local cb_name = vim.api.nvim_buf_get_name(0)
 	for kb, vb in pairs(buffers) do
 		local loaded = vim.api.nvim_buf_is_loaded(vb)
 		if loaded == true then
 			local name = vim.api.nvim_buf_get_name(vb)
 			local trim = API.str_trim(name)
 			if trim ~= "" and
-				trim ~= API.str_trim(cb_name) and 
+				-- trim ~= API.str_trim(cb_name) and 
 				API.contains(trim, "term:") ~= true then
 				table.insert(names, trim)
 			end
 		end
 	end
-	if API.str_trim(cb_name) ~= "" then
-		local pos = 2
-		if #names == 0 then
-			pos = 1
-		end
-		table.insert(names, pos, cb_name)
-	end
+	-- if API.str_trim(cb_name) ~= "" then
+	-- 	local pos = 2
+	-- 	if #names == 0 then
+	-- 		pos = 1
+	-- 	end
+	-- 	table.insert(names, pos, cb_name)
+	-- end
 	return names
 end
 
