@@ -52,7 +52,7 @@ function Select()
 
 	vim.ui.select(buffers, { prompt = "Active Buffers ("..#buffers..")" }, function(choice)
 		if choice then
-			local command = "edit " .. choice
+			local command = "buffer " .. choice
 			local open, _ = pcall(vim.cmd, command)
 			if open == true then
 				vim.cmd(command)
