@@ -1,4 +1,6 @@
 local M ={}
+local fzf = nil
+local fzf_props = {}
 local API = {
 	str_trim = function(s)
 		return s:match("^%s*(.-)%s*$")
@@ -49,8 +51,33 @@ function Select()
 		vim.notify("I do not have non-empty buffers", vim.log.levels.INFO)
 		return
 	end
+	if fzf ~= nil then
+		fzf_props["prompt"] = "Opened Files ("..#buffers..")"
+		fzf_props["cwd"] = vim.loop.cwd()
+		fzf_props["actions"] = {
+			["default"] = function(selected)
+				local choice = selected[1]
+				if choice then
+					local command = "buffer " .. choice
+					local open, _ = pcall(vim.cmd, command)
+					if open == true then
+						vim.cmd(command)
+					end
+				end
+			end
+		}
+		if fzf_props["winopts"] == nil then
+			fzf_props["winopts"] = {
+				height = 0.35,
+				width = 0.50,
+				border = "rounded",
+			}
+		end
+		fzf.fzf_exec(buffers, fzf_props)
+		return
+	end
 
-	vim.ui.select(buffers, { prompt = "Active Buffers ("..#buffers..")" }, function(choice)
+	vim.ui.select(buffers, { prompt = "Opened Files ("..#buffers..")" }, function(choice)
 		if choice then
 			local command = "buffer " .. choice
 			local open, _ = pcall(vim.cmd, command)
@@ -63,15 +90,16 @@ end
 
 M.setup = function(props)
 	if props == nil then
-		props = {dressing = {}}
+		props = {fzflua = {}}
 	end
-	local has_dressing, _ = pcall(require, "dressing")
-	if has_dressing == true then
-		local dress_opts = props.dressing
-		if dress_opts == nil then
-			dress_opts = {}
+	local has_fzflua, _ = pcall(require, "fzf-lua")
+	if has_fzflua == true then
+		fzf_props = props.fzflua
+		if fzf_props == nil then
+			fzf_props = {}
 		end
-		require("dressing").setup(dress_opts)
+		fzf = require("fzf-lua")
+		-- require("fzf-lua").setup(fzflua_opts)
 	end
 	vim.api.nvim_create_user_command("BuffersJump", Select, {})
 end
