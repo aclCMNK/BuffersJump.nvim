@@ -31,7 +31,7 @@ BuffersJump is a plugin for Neovim 0.9+. This plugin helps to jump between opene
 			   end
     }
 
-### Usage
+## Usage
 You can use BuffersJump running this command:
 
     :BuffersJump
