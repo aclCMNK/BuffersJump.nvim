@@ -16,21 +16,17 @@ BuffersJump is a plugin for Neovim 0.9+. This plugin helps to jump between opene
 		    end
     }
 
-### Installation with dressing
+### Installation with FZFLua
 **Using Lazy**
 
     {
 			   "aclCMNK/BuffersJump.nvim",
 			   dependencies = {
-					   "https://github.com/stevearc/dressing.nvim"
-					   -- If you want to use telescope
-					   "nvim-telescope/telescope.nvim"
-					   -- Or if you want to use NUI
-					   "MunifTanjim/nui.nvim"
+					   "ibhagwan/fzf-lua"
 			   },
 			   config = function()
 					   require("buffers_jump").setup({
-							   dressing = {...} -- dressing options
+							   fzflua = {...} -- FZFLua options
 					   })
 			   end
     }
