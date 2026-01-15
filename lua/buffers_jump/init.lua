@@ -1,7 +1,12 @@
-local M ={}
-local fzf = nil
-local fzf_props = {}
 local API = {
+	split = function(str, sep)
+		local result = {}
+		local pattern = "([^" .. sep .. "]+)"
+		for part in string.gmatch(str, pattern) do
+			table.insert(result, part)
+		end
+		return result
+	end,
 	str_trim = function(s)
 		return s:match("^%s*(.-)%s*$")
 	end,
@@ -17,31 +22,48 @@ local API = {
 	end
 }
 
+local M = {}
+local fzf = nil
+local fzf_props = {}
+
 function Get_Buffers()
 	local buffers = vim.api.nvim_list_bufs()
 	local count = 0
 	local names = {}
+	local temp_names = {}
 	local cb_name = vim.api.nvim_buf_get_name(0)
 	for kb, vb in pairs(buffers) do
 		local loaded = vim.api.nvim_buf_is_loaded(vb)
-		if loaded == true then
+		local listed = vim.api.nvim_buf_get_option(vb, "buflisted")
+		if loaded == true and listed == true then
 			local name = vim.api.nvim_buf_get_name(vb)
-			local trim = API.str_trim(name)
-			if trim ~= "" and
-				trim ~= API.str_trim(cb_name) and 
-				API.contains(trim, "term:") ~= true then
-				table.insert(names, trim)
+			local name_split = API.split(name, "/")
+			local file_name = name_split[#name_split - 1] .. "/" .. name_split[#name_split]
+			if #name_split >= 3 then
+				file_name = name_split[#name_split - 2] .. "/" .. name_split[#name_split - 1] .. "/" .. name_split[#name_split]
+			end
+			local full_item_name = file_name .. " | " .. name
+			local trim = API.str_trim(full_item_name)
+			if type(temp_names[API.str_trim(name)]) == "nil" then
+				if trim ~= "" and
+					API.str_trim(name) ~= API.str_trim(cb_name) and
+					API.contains(trim, "term:") ~= true then
+					table.insert(names, trim)
+				end
 			end
 		end
 	end
-	-- if API.str_trim(cb_name) ~= "" then
-	-- 	local pos = 2
-	-- 	if #names == 0 then
-	-- 		pos = 1
-	-- 	end
-	-- 	table.insert(names, pos, cb_name)
-	-- end
 	return names
+end
+
+function Select_choice(choice)
+	local split = API.split(choice, " | ")
+	local path = split[#split]
+	local command = "buffer " .. path
+	local open, _ = pcall(vim.cmd, command)
+	if open == true then
+		vim.cmd(command)
+	end
 end
 
 function Select()
@@ -52,17 +74,13 @@ function Select()
 		return
 	end
 	if fzf ~= nil then
-		fzf_props["prompt"] = "Opened Files ("..#buffers..")"
+		fzf_props["prompt"] = "Opened Files (" .. #buffers .. ")"
 		fzf_props["cwd"] = vim.loop.cwd()
 		fzf_props["actions"] = {
 			["default"] = function(selected)
 				local choice = selected[1]
 				if choice then
-					local command = "buffer " .. choice
-					local open, _ = pcall(vim.cmd, command)
-					if open == true then
-						vim.cmd(command)
-					end
+					Select_choice(choice)
 				end
 			end
 		}
@@ -77,20 +95,16 @@ function Select()
 		return
 	end
 
-	vim.ui.select(buffers, { prompt = "Opened Files ("..#buffers..")" }, function(choice)
+	vim.ui.select(buffers, { prompt = "Opened Files (" .. #buffers .. ")" }, function(choice)
 		if choice then
-			local command = "buffer " .. choice
-			local open, _ = pcall(vim.cmd, command)
-			if open == true then
-				vim.cmd(command)
-			end
+			Select_choice(choice)
 		end
 	end)
 end
 
 M.setup = function(props)
 	if props == nil then
-		props = {fzflua = {}}
+		props = { fzflua = {} }
 	end
 	local has_fzflua, _ = pcall(require, "fzf-lua")
 	if has_fzflua == true then
