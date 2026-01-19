@@ -38,6 +38,9 @@ function Get_Buffers()
 		if loaded == true and listed == true then
 			local name = vim.api.nvim_buf_get_name(vb)
 			local name_split = API.split(name, "/")
+			if #name_split == 0 then
+                goto continue
+            end
 			local file_name = name_split[#name_split - 1] .. "/" .. name_split[#name_split]
 			if #name_split >= 3 then
 				file_name = name_split[#name_split - 2] .. "/" .. name_split[#name_split - 1] .. "/" .. name_split[#name_split]
@@ -52,6 +55,7 @@ function Get_Buffers()
 				end
 			end
 		end
+		::continue::
 	end
 	return names
 end
